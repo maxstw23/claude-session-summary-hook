@@ -36,7 +36,7 @@ You can also adjust `COOLDOWN` (default: 600 seconds / 10 minutes).
 
 ### 3. Register in Claude Code
 
-Add to `~/.claude/settings.json`:
+Add both hooks to `~/.claude/settings.json`:
 
 ```json
 {
@@ -50,6 +50,16 @@ Add to `~/.claude/settings.json`:
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /path/to/force-trigger.sh"
+          }
+        ]
+      }
     ]
   }
 }
@@ -58,8 +68,16 @@ Add to `~/.claude/settings.json`:
 ### 4. Make executable
 
 ```bash
-chmod +x /path/to/session-summary.sh
+chmod +x /path/to/session-summary.sh /path/to/force-trigger.sh
 ```
+
+## Force update
+
+To trigger an immediate summary outside the normal 10-minute window, just say:
+
+> **"update rolling memory"**
+
+`force-trigger.sh` detects this phrase and sets a flag that causes `session-summary.sh` to bypass the cooldown on the next turn.
 
 ## Requirements
 
