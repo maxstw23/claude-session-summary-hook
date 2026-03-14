@@ -77,7 +77,7 @@ To trigger an immediate summary outside the normal 10-minute window, just say:
 
 > **"update rolling memory"**
 
-`force-trigger.sh` detects this phrase and sets a flag that causes `session-summary.sh` to bypass the cooldown on the next turn.
+`force-trigger.sh` intercepts this phrase via `UserPromptSubmit` and blocks with a mandatory summary instruction before Claude generates its response — so the summary is written in the same turn, with no extra round-trip.
 
 ## Requirements
 

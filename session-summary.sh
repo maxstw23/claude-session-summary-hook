@@ -4,15 +4,9 @@
 # Asks Claude to update a rolling session log every COOLDOWN seconds.
 # Silent for the first COOLDOWN seconds of a session.
 # Resets the timer after each ask, regardless of Claude's response.
-#
-# Setup:
-#   1. Set MEMORY_FILE to your session log path.
-#   2. Register in ~/.claude/settings.json (see README).
-#   3. Create MEMORY_FILE with a '## Sessions (newest first)' section.
 
-MEMORY_FILE="$HOME/.claude/projects/$(basename $PWD)/memory/session_history.md"
+MEMORY_FILE="/home/maxwoo/.claude/projects/-home-maxwoo-Research-OmegaNet/memory/session_history.md"
 COOLDOWN=600       # seconds (10 min)
-FORCE_FLAG="$HOME/.claude/force-summary"
 
 INPUT=$(cat)
 
@@ -27,19 +21,6 @@ LAST_ASKED="/tmp/claude_session_last_asked_${SESSION_ID}"
 
 if [ ! -f "$SESSION_START" ]; then
   touch "$SESSION_START"
-fi
-
-# Force flag: bypass cooldown, then remove the flag. Summary is mandatory.
-if [ -f "$FORCE_FLAG" ]; then
-  rm -f "$FORCE_FLAG"
-  touch "$LAST_ASKED"
-  cat <<EOF
-{
-  "decision": "block",
-  "reason": "Prepend a one-sentence summary of this session to the '## Sessions (newest first)' list in ${MEMORY_FILE} (keep only the 5 most recent entries, drop the oldest if needed). Format: '1. **YYYY-MM-DD** — <one sentence>.'"
-}
-EOF
-  exit 0
 fi
 
 NOW=$(date +%s)
