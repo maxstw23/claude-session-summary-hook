@@ -14,12 +14,12 @@ TRANSCRIPT=$(echo "$INPUT" | jq -r '.transcript_path // ""')
 if [ -n "$TRANSCRIPT" ]; then
   # transcript_path is like ~/.claude/projects/<slug>/...
   PROJECT_SLUG=$(echo "$TRANSCRIPT" | sed 's|.*/projects/\([^/]*\)/.*|\1|')
-  MEMORY_FILE="/home/maxwoo/.claude/projects/${PROJECT_SLUG}/memory/session_history.md"
+  MEMORY_FILE="${HOME}/.claude/projects/${PROJECT_SLUG}/memory/session_history.md"
 else
   CWD=$(echo "$INPUT" | jq -r '.cwd // ""')
   if [ -z "$CWD" ]; then CWD=$(pwd); fi
   PROJECT_SLUG=$(echo "$CWD" | sed 's|/|-|g')
-  MEMORY_FILE="/home/maxwoo/.claude/projects/${PROJECT_SLUG}/memory/session_history.md"
+  MEMORY_FILE="${HOME}/.claude/projects/${PROJECT_SLUG}/memory/session_history.md"
 fi
 
 HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
