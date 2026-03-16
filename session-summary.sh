@@ -9,25 +9,33 @@ COOLDOWN=600       # seconds (10 min)
 
 INPUT=$(cat)
 
-# Derive project memory path from transcript_path or cwd
-TRANSCRIPT=$(echo "$INPUT" | jq -r '.transcript_path // ""')
-if [ -n "$TRANSCRIPT" ]; then
-  # transcript_path is like ~/.claude/projects/<slug>/...
-  PROJECT_SLUG=$(echo "$TRANSCRIPT" | sed 's|.*/projects/\([^/]*\)/.*|\1|')
-  MEMORY_FILE="${HOME}/.claude/projects/${PROJECT_SLUG}/memory/session_history.md"
-else
-  CWD=$(echo "$INPUT" | jq -r '.cwd // ""')
-  if [ -z "$CWD" ]; then CWD=$(pwd); fi
-  PROJECT_SLUG=$(echo "$CWD" | sed 's|/|-|g')
-  MEMORY_FILE="${HOME}/.claude/projects/${PROJECT_SLUG}/memory/session_history.md"
-fi
-
 HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
 if [ "$HOOK_ACTIVE" = "true" ]; then
   exit 0
 fi
 
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // "unknown"')
+
+# Derive project memory path from transcript_path or cwd.
+# For the cwd fallback, cache the root on first invocation so it stays
+# stable even if the shell later cds into a subdirectory.
+TRANSCRIPT=$(echo "$INPUT" | jq -r '.transcript_path // ""')
+if [ -n "$TRANSCRIPT" ]; then
+  # transcript_path is like ~/.claude/projects/<slug>/...
+  PROJECT_SLUG=$(echo "$TRANSCRIPT" | sed 's|.*/projects/\([^/]*\)/.*|\1|')
+  MEMORY_FILE="${HOME}/.claude/projects/${PROJECT_SLUG}/memory/session_history.md"
+else
+  SESSION_ROOT_FILE="/tmp/claude_session_root_${SESSION_ID}"
+  if [ -f "$SESSION_ROOT_FILE" ]; then
+    CWD=$(cat "$SESSION_ROOT_FILE")
+  else
+    CWD=$(echo "$INPUT" | jq -r '.cwd // ""')
+    if [ -z "$CWD" ]; then CWD=$(pwd); fi
+    echo "$CWD" > "$SESSION_ROOT_FILE"
+  fi
+  PROJECT_SLUG=$(echo "$CWD" | sed 's|/|-|g')
+  MEMORY_FILE="${HOME}/.claude/projects/${PROJECT_SLUG}/memory/session_history.md"
+fi
 SESSION_START="/tmp/claude_session_start_${SESSION_ID}"
 LAST_ASKED="/tmp/claude_session_last_asked_${SESSION_ID}"
 
