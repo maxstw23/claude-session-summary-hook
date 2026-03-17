@@ -30,8 +30,10 @@ MEMORY_FILE="${HOME}/.claude/projects/${PROJECT_SLUG}/memory/session_history.md"
 if echo "$PROMPT" | grep -qF "$TRIGGER"; then
   cat <<EOF
 {
-  "decision": "block",
-  "reason": "Prepend a one-sentence summary of this session to the '## Sessions (newest first)' list in ${MEMORY_FILE} (keep only the 5 most recent entries, drop the oldest if needed). Format: '1. **YYYY-MM-DD** — <one sentence>.'"
+  "decision": "approve",
+  "hookSpecificOutput": {
+    "additionalSystemPrompt": "The user has requested a memory update. Prepend a one-sentence summary of this session to the '## Sessions (newest first)' list in ${MEMORY_FILE} (keep only the 5 most recent entries, drop the oldest if needed). Format: '1. **YYYY-MM-DD** — <one sentence>.'"
+  }
 }
 EOF
   exit 0

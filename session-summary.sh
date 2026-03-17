@@ -9,6 +9,7 @@ COOLDOWN=600       # seconds (10 min)
 
 INPUT=$(cat)
 
+
 HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
 if [ "$HOOK_ACTIVE" = "true" ]; then
   exit 0
@@ -36,6 +37,9 @@ else
   PROJECT_SLUG=$(echo "$CWD" | sed 's|/|-|g')
   MEMORY_FILE="${HOME}/.claude/projects/${PROJECT_SLUG}/memory/session_history.md"
 fi
+LOG_FILE="${HOME}/.claude/hooks/session-summary.log"
+echo "$(date -Iseconds) session=${SESSION_ID} transcript=${TRANSCRIPT} cwd=${CWD} slug=${PROJECT_SLUG} memory=${MEMORY_FILE}" >> "$LOG_FILE"
+
 SESSION_START="/tmp/claude_session_start_${SESSION_ID}"
 LAST_ASKED="/tmp/claude_session_last_asked_${SESSION_ID}"
 
